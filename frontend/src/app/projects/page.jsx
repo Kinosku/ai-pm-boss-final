@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
-import Sidebar from "@/components/Sidebar";
-import Navbar  from "@/components/Navbar";
-import Modal   from "@/components/ui/Modal";
-import Button  from "@/components/ui/Button";
-import { projectsApi } from "@/services/api";
+import Sidebar from "../components/Sidebar";
+import Navbar  from "../components/Navbar";
+import Modal   from "../components/ui/Modal";
+import Button  from "../components/ui/Button";
+import { projectsApi } from "../services/api";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);

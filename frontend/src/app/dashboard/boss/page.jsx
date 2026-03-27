@@ -1,23 +1,29 @@
 "use client";
-import { useEffect, useState } from "react";
-import Sidebar from "@/components/Sidebar";
-import Navbar  from "@/components/Navbar";
-import { StatCard } from "@/components/ui/Card";
-import { dashboardApi, agentsApi } from "@/services/api";
-import { severityColor, timeAgo, capitalize } from "@/utils/helpers";
-import { SprintProgressBar } from "@/components/Charts";
-
+import { useState, useEffect } from "react";
+import Sidebar from "../../../components/Sidebar";
+import Navbar from "../../../components/Navbar";
+import { StatCard } from "../../../components/ui/Card";
+import { dashboardApi, agentsApi } from "../../../services/api";
+import { severityColor, timeAgo, capitalize } from "../../../utils/helpers";
+import { SprintProgressBar } from "../../../components/Charts";
 export default function BossDashboard() {
   const [data, setData]     = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    dashboardApi.boss()
-      .then(({ data }) => setData(data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const res = await dashboardApi.boss();
+      setData(res.data);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
+  };
 
+  fetchData();
+}, []);
   const sprint   = data?.active_sprint   || {};
   const tasks    = data?.task_counts     || {};
   const risks    = data?.risk_counts     || {};
@@ -34,7 +40,8 @@ export default function BossDashboard() {
     try { await agentsApi.trigger({ project_id: 1, agent }); }
     catch (e) { console.error(e); }
   };
-
+if (loading) return <div>Loading...</div>;
+if (!data) return <div>No data</div>;
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />

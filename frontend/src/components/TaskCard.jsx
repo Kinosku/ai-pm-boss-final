@@ -1,5 +1,5 @@
 "use client";
-import { statusColor, priorityColor, formatDate, capitalize } from "@/utils/helpers";
+import { statusColor, priorityColor, formatDate, capitalize } from "../utils/helpers";
 
 export default function TaskCard({ task, onStatusChange }) {
   const statuses = ["todo", "in_progress", "in_review", "blocked", "done"];

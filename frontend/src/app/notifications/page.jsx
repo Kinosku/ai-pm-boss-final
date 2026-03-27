@@ -1,9 +1,9 @@
 "use client";
-import Sidebar from "@/components/Sidebar";
-import Navbar  from "@/components/Navbar";
-import NotificationsPanel from "@/components/NotificationsPanel";
-import { notificationsApi } from "@/services/api";
-import Button from "@/components/ui/Button";
+import Sidebar from "../../components/Sidebar";
+import Navbar  from "../../components/Navbar";
+import NotificationsPanel from "../../components/NotificationsPanel";
+import { notificationsApi } from "../../services/api";
+import Button from "../../components/ui/Button";
 
 export default function NotificationsPage() {
   return (

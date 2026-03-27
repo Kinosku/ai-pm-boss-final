@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import Sidebar from "@/components/Sidebar";
-import Navbar  from "@/components/Navbar";
-import { risksApi } from "@/services/api";
-import { severityColor, timeAgo } from "@/utils/helpers";
+import Sidebar from "../components/Sidebar";
+import Navbar  from "../components/Navbar";
+import { risksApi } from "../services/api";
+import { severityColor, timeAgo } from "../utils/helpers";
 
 export default function RisksPage() {
   const [risks, setRisks]   = useState([]);

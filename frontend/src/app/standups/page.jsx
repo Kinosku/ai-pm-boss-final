@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
-import Sidebar from "@/components/Sidebar";
-import Navbar  from "@/components/Navbar";
-import Button  from "@/components/ui/Button";
-import { standupsApi } from "@/services/api";
-import { timeAgo } from "@/utils/helpers";
+import Sidebar from "../../components/Sidebar";
+import Navbar  from "../../components/Navbar";
+import Button  from "../../components/ui/Button";
+import { standupsApi } from "../../services/api";
+import { timeAgo } from "../../utils/helpers";
 
 export default function StandupsPage() {
   const [standups, setStandups]   = useState([]);

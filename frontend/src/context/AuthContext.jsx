@@ -1,16 +1,15 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
-import { api } from "@/services/api";
+import { api } from "../services/api";
 import { useRouter } from "next/navigation";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser]       = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // Hydrate from localStorage on mount
   useEffect(() => {
     const token = localStorage.getItem("token");
     const stored = localStorage.getItem("user");
@@ -21,14 +20,21 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    const { data } = await api.post("/auth/login", { email, password });
-    localStorage.setItem("token", data.access_token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    setUser(data.user);
-    // Role-based redirect
-    if (data.user.role === "boss") router.push("/dashboard/boss");
-    else router.push("/dashboard/employee");
-    return data.user;
+    try {
+      const res = await api.post("/auth/login", { email, password });
+      const data = res.data;
+
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      setUser(data.user);
+
+      if (data.user.role === "boss") router.push("/dashboard/boss");
+      else router.push("/dashboard/employee");
+
+    } catch {
+      alert("Invalid credentials");
+    }
   };
 
   const logout = () => {
@@ -38,11 +44,8 @@ export function AuthProvider({ children }) {
     router.push("/");
   };
 
-  const isBoss     = user?.role === "boss";
-  const isEmployee = user?.role === "employee";
-
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, isBoss, isEmployee }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

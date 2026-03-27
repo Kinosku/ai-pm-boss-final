@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
-import Sidebar from "@/components/Sidebar";
-import Navbar  from "@/components/Navbar";
-import { sprintsApi, tasksApi } from "@/services/api";
-import { statusColor, capitalize, sprintProgress } from "@/utils/helpers";
-import { SprintProgressBar } from "@/components/Charts";
+import Sidebar from "../../components/Sidebar";
+import Navbar  from "../../components/Navbar";
+import { sprintsApi, tasksApi } from "../../services/api";
+import { statusColor, capitalize, sprintProgress } from "../../utils/helpers";
+import { SprintProgressBar } from "../../components/Charts";
 
 const COLUMNS = ["backlog","todo","in_progress","in_review","blocked","done"];
 const COL_LABELS = { backlog:"Backlog", todo:"To Do", in_progress:"In Progress", in_review:"In Review", blocked:"Blocked", done:"Done" };

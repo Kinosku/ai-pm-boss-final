@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import Sidebar from "@/components/Sidebar";
-import Navbar  from "@/components/Navbar";
-import { teamApi } from "@/services/api";
+import Sidebar from "../../components/Sidebar";
+import Navbar  from "../../components/Navbar";
+import { teamApi } from "../../services/api";
 
 export default function TeamPage() {
   const [data, setData] = useState(null);

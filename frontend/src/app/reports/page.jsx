@@ -1,11 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import Sidebar from "@/components/Sidebar";
-import Navbar  from "@/components/Navbar";
-import { VelocityChart } from "@/components/Charts";
-import { StatCard } from "@/components/ui/Card";
-import Button from "@/components/ui/Button";
-import { reportsApi } from "@/services/api";
+import Sidebar from "../components/Sidebar";
+import Navbar  from "../components/Navbar";
+import { VelocityChart } from "../components/Charts";
+import { StatCard } from "../components/ui/Card";
+import Button from "../components/ui/Button";
+import { reportsApi } from "../services/api";
 
 export default function ReportsPage() {
   const [summary,   setSummary]  = useState(null);

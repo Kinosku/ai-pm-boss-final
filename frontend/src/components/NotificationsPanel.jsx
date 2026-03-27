@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { notificationsApi } from "@/services/api";
-import { timeAgo } from "@/utils/helpers";
+import { notificationsApi } from "../services/api";
+import { timeAgo } from "../utils/helpers";
 
 const typeIcon = {
   risk_alert:    { icon: "warning",        color: "text-red-400    bg-red-400/10" },

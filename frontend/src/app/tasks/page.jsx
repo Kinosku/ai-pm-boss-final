@@ -1,12 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
-import Sidebar   from "@/components/Sidebar";
-import Navbar    from "@/components/Navbar";
-import TaskCard  from "@/components/TaskCard";
-import Modal     from "@/components/ui/Modal";
-import Button    from "@/components/ui/Button";
-import { tasksApi } from "@/services/api";
-import { useAuth } from "@/context/AuthContext";
+import Sidebar from "../../components/Sidebar";
+import Navbar from "../../components/Navbar";
+import TaskCard from "../../components/TaskCard";
+import Modal from "../../components/ui/Modal";
+import Button    from "../../components/ui/Button";
+import { tasksApi } from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 
 const STATUSES   = ["all","todo","in_progress","in_review","blocked","done"];
 const PRIORITIES = ["all","high","medium","low"];

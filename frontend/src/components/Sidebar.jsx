@@ -1,8 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-
+import { useAuth } from "../context/AuthContext";
 const BOSS_NAV = [
   { label: "Dashboard",    href: "/dashboard/boss",  icon: "dashboard" },
   { label: "Risk Alerts",  href: "/risks",            icon: "warning" },

@@ -1,5 +1,5 @@
-import "@/styles/globals.css";
-import { AuthProvider } from "@/context/AuthContext";
+import "../styles/globals.css";
+import { AuthProvider } from "../context/AuthContext";
 
 export const metadata = {
   title: "AI PM Boss",

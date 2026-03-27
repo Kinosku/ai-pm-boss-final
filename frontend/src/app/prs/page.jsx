@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
-import Sidebar from "@/components/Sidebar";
-import Navbar  from "@/components/Navbar";
-import { prsApi } from "@/services/api";
-import { prStatusColor, timeAgo, capitalize } from "@/utils/helpers";
-import { useAuth } from "@/context/AuthContext";
+import Sidebar from "../../components/Sidebar";
+import Navbar from "../../components/Navbar";
+import { prsApi } from "../../services/api";
+import { prStatusColor, timeAgo, capitalize } from "../../utils/helpers";
+import { useAuth } from "../../context/AuthContext";
 
 export default function PRsPage() {
   const { isBoss }        = useAuth();

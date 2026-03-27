@@ -1,11 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
-import Sidebar  from "@/components/Sidebar";
-import Navbar   from "@/components/Navbar";
-import { StatCard } from "@/components/ui/Card";
-import { dashboardApi, standupsApi } from "@/services/api";
-import { statusColor, priorityColor, prStatusColor, capitalize, formatDate } from "@/utils/helpers";
-
+import Sidebar from "../../../components/Sidebar";
+import Navbar from "../../../components/Navbar";
+import { StatCard } from "../../../components/ui/Card";
+import { dashboardApi, standupsApi } from "../../../services/api";
+import { statusColor, priorityColor, prStatusColor, capitalize, formatDate } from "../../../utils/helpers";
 export default function EmployeeDashboard() {
   const [data, setData]     = useState(null);
   const [loading, setLoading] = useState(true);

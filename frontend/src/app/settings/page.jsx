@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import Sidebar from "@/components/Sidebar";
-import Navbar  from "@/components/Navbar";
-import Button  from "@/components/ui/Button";
-import { settingsApi } from "@/services/api";
+import Sidebar from "../../components/Sidebar";
+import Navbar from "../../components/Navbar";
+import Button from "../../components/ui/Button";
+import { settingsApi } from "../../services/api";
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState({ full_name: "", email: "", avatar_url: "" });

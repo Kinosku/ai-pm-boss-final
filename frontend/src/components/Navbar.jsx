@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { notificationsApi } from "@/services/api";
+import { useAuth } from "../context/AuthContext";
+import { notificationsApi } from "../services/api";
 
 export default function Navbar({ title }) {
   const { user } = useAuth();
