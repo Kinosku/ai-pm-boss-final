@@ -1,67 +1,99 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
-import Navbar  from "../../components/Navbar";
-import { sprintsApi, tasksApi } from "../../services/api";
-import { statusColor, capitalize, sprintProgress } from "../../utils/helpers";
-import { SprintProgressBar } from "../../components/Charts";
+import Navbar from "../../components/Navbar";
+import { tasksApi } from "../../services/api";
 
-const COLUMNS = ["backlog","todo","in_progress","in_review","blocked","done"];
-const COL_LABELS = { backlog:"Backlog", todo:"To Do", in_progress:"In Progress", in_review:"In Review", blocked:"Blocked", done:"Done" };
+const columns = [
+  { key: "todo", label: "To Do" },
+  { key: "in_progress", label: "In Progress" },
+  { key: "in_review", label: "In Review" },
+  { key: "done", label: "Done" },
+];
 
 export default function SprintPage() {
-  const [sprint, setSprint] = useState(null);
-  const [tasks,  setTasks]  = useState([]);
+  const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // 🔥 Fetch tasks
   useEffect(() => {
-    sprintsApi.active().then(async ({ data }) => {
-      if (data[0]) {
-        setSprint(data[0]);
-        const t = await tasksApi.list({ sprint_id: data[0].id });
-        setTasks(t.data);
+    const fetchTasks = async () => {
+      try {
+        const res = await tasksApi.list();
+        setTasks(res.data || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-    }).finally(() => setLoading(false));
+    };
+
+    fetchTasks();
   }, []);
 
-  const grouped = COLUMNS.reduce((acc, col) => {
-    acc[col] = tasks.filter((t) => t.status === col);
+  // 🔥 Move task between columns
+  const moveTask = async (task, newStatus) => {
+    try {
+      await tasksApi.update(task.id, { status: newStatus });
+
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === task.id ? { ...t, status: newStatus } : t
+        )
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // 🔥 Group tasks
+  const grouped = columns.reduce((acc, col) => {
+    acc[col.key] = tasks.filter((t) => t.status === col.key);
     return acc;
   }, {});
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex min-h-screen bg-background">
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+
+      <div className="flex-1">
         <Navbar title="Sprint Board" />
-        <main className="flex-1 overflow-hidden flex flex-col px-8 py-6 gap-5">
-          {sprint && (
-            <div className="bg-surface-container ghost-border rounded-2xl p-5 shrink-0">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="font-headline font-bold text-lg">{sprint.name}</h2>
-                <span className="text-xs font-mono text-primary">{sprint.health_score}/100</span>
-              </div>
-              <SprintProgressBar completed={sprint.points_completed} planned={sprint.points_planned} />
-            </div>
-          )}
-          {/* Kanban */}
-          <div className="flex-1 overflow-x-auto">
-            <div className="flex gap-3 h-full min-w-max">
-              {COLUMNS.map((col) => (
-                <div key={col} className="w-64 flex flex-col bg-surface-container ghost-border rounded-2xl overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{COL_LABELS[col]}</span>
-                    <span className="text-xs font-mono text-slate-500">{grouped[col]?.length}</span>
-                  </div>
-                  <div className="flex-1 overflow-y-auto p-3 space-y-2">
-                    {grouped[col]?.map((t) => (
-                      <div key={t.id} className="bg-surface-container-high rounded-xl p-3 ghost-border hover:bg-surface-container-highest transition-colors cursor-pointer">
-                        <p className="text-xs font-medium leading-snug">{t.title}</p>
-                        <div className="flex items-center justify-between mt-2">
-                          <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                            t.priority === "high" ? "text-red-400 bg-red-400/10" : t.priority === "medium" ? "text-yellow-400 bg-yellow-400/10" : "text-green-400 bg-green-400/10"
-                          }`}>{t.priority}</span>
-                          {t.story_points && <span className="text-[9px] font-mono text-slate-500">{t.story_points}pt</span>}
+
+        <div className="p-6">
+          <h1 className="text-2xl font-bold mb-6">Sprint Board</h1>
+
+          {loading ? (
+            <p className="text-gray-400">Loading tasks...</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {columns.map((col) => (
+                <div
+                  key={col.key}
+                  className="bg-white/5 border border-white/10 rounded-lg p-3"
+                >
+                  <h2 className="font-semibold mb-3">{col.label}</h2>
+
+                  <div className="space-y-2">
+                    {grouped[col.key]?.map((task) => (
+                      <div
+                        key={task.id}
+                        className="p-3 rounded bg-white/10 text-sm"
+                      >
+                        <p className="font-medium">{task.title}</p>
+
+                        <div className="flex gap-2 mt-2 flex-wrap">
+                          {columns.map((c) =>
+                            c.key !== task.status ? (
+                              <button
+                                key={c.key}
+                                onClick={() => moveTask(task, c.key)}
+                                className="text-xs px-2 py-1 bg-primary rounded text-black"
+                              >
+                                Move to {c.label}
+                              </button>
+                            ) : null
+                          )}
                         </div>
                       </div>
                     ))}
@@ -69,8 +101,8 @@ export default function SprintPage() {
                 </div>
               ))}
             </div>
-          </div>
-        </main>
+          )}
+        </div>
       </div>
     </div>
   );

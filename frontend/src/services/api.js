@@ -1,142 +1,95 @@
 import axios from "axios";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
-export const api = axios.create({ baseURL: `${BASE}/api` });
+const api = axios.create({ baseURL: API_URL });
 
-// Attach JWT on every request
 api.interceptors.request.use((config) => {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// Auto-logout on 401
-api.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    if (err.response?.status === 401 && typeof window !== "undefined") {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location.href = "/";
-    }
-    return Promise.reject(err);
-  }
-);
 
-// ─── Auth ─────────────────────────────────────────────────────────────────────
 export const authApi = {
-  login:    (d)  => api.post("/auth/login", d),
-  register: (d)  => api.post("/auth/register", d),
-  me:       ()   => api.get("/auth/me"),
+  login: (data) => api.post("/auth/login", data),
+  register: (data) => api.post("/auth/register", data),
+  me: () => api.get("/auth/me"),
 };
 
-// ─── Dashboard ────────────────────────────────────────────────────────────────
 export const dashboardApi = {
-  boss:     ()   => api.get("/dashboard/boss"),
-  employee: ()   => api.get("/dashboard/employee"),
+  boss: () => api.get("/dashboard/boss"),
+  employee: () => api.get("/dashboard/employee"),
 };
 
-// ─── Projects ─────────────────────────────────────────────────────────────────
 export const projectsApi = {
-  list:   ()    => api.get("/projects"),
-  get:    (id)  => api.get(`/projects/${id}`),
-  create: (d)   => api.post("/projects", d),
-  update: (id, d) => api.patch(`/projects/${id}`, d),
-  delete: (id)  => api.delete(`/projects/${id}`),
+  list: () => api.get("/projects"),
+  create: (data) => api.post("/projects", data),
+  get: (id) => api.get(`/projects/${id}`),
+  update: (id, data) => api.patch(`/projects/${id}`, data),
+  delete: (id) => api.delete(`/projects/${id}`),
 };
 
-// ─── Tasks ────────────────────────────────────────────────────────────────────
 export const tasksApi = {
-  list:     (p)   => api.get("/tasks", { params: p }),
-  get:      (id)  => api.get(`/tasks/${id}`),
-  create:   (d)   => api.post("/tasks", d),
-  update:   (id, d) => api.patch(`/tasks/${id}`, d),
-  delete:   (id)  => api.delete(`/tasks/${id}`),
-  parsePrd: (d)   => api.post("/tasks/parse-prd", d),
+  list: (projectId) => api.get(`/tasks/project/${projectId}`),
+  all: () => api.get("/tasks"),
+  create: (data) => api.post("/tasks", data),
+  update: (id, data) => api.patch(`/tasks/${id}`, data),
+  delete: (id) => api.delete(`/tasks/${id}`),
+  my: () => api.get("/tasks/my"),
 };
 
-// ─── Sprints ──────────────────────────────────────────────────────────────────
 export const sprintsApi = {
-  list:     (p)   => api.get("/sprints", { params: p }),
-  active:   (p)   => api.get("/sprints/active", { params: p }),
-  get:      (id)  => api.get(`/sprints/${id}`),
-  stats:    (id)  => api.get(`/sprints/${id}/stats`),
-  create:   (d)   => api.post("/sprints", d),
-  update:   (id, d) => api.patch(`/sprints/${id}`, d),
-  start:    (id)  => api.post(`/sprints/${id}/start`),
-  complete: (id)  => api.post(`/sprints/${id}/complete`),
+  list: () => api.get("/sprints"),
+  create: (data) => api.post("/sprints", data),
+  get: (id) => api.get(`/sprints/${id}`),
+  update: (id, data) => api.patch(`/sprints/${id}`, data),
 };
 
-// ─── Pull Requests ────────────────────────────────────────────────────────────
-export const prsApi = {
-  list:   (p)   => api.get("/pull-requests", { params: p }),
-  my:     ()    => api.get("/pull-requests/my"),
-  stale:  (p)   => api.get("/pull-requests/stale/list", { params: p }),
-  get:    (id)  => api.get(`/pull-requests/${id}`),
-  update: (id, d) => api.patch(`/pull-requests/${id}`, d),
-};
-
-// ─── Risks ────────────────────────────────────────────────────────────────────
-export const risksApi = {
-  list:    (p)  => api.get("/risks", { params: p }),
-  counts:  (p)  => api.get("/risks/counts", { params: p }),
-  analyze: (d)  => api.post("/risks/analyze", d),
-  get:     (id) => api.get(`/risks/${id}`),
-  update:  (id, d) => api.patch(`/risks/${id}`, d),
-  resolve: (id) => api.post(`/risks/${id}/resolve`),
-};
-
-// ─── Standups ─────────────────────────────────────────────────────────────────
-export const standupsApi = {
-  list:            (p) => api.get("/standups", { params: p }),
-  submit:          (d) => api.post("/standups", d),
-  generateSummary: (d) => api.post("/standups/generate-summary", d),
-};
-
-// ─── Reports ──────────────────────────────────────────────────────────────────
-export const reportsApi = {
-  generate:  (p)   => api.post("/reports/generate", null, { params: p }),
-  velocity:  (id)  => api.get(`/reports/velocity/${id}`),
-  summary:   (id)  => api.get(`/reports/summary/${id}`),
-};
-
-// ─── Team ─────────────────────────────────────────────────────────────────────
-export const teamApi = {
-  list:     (p)   => api.get("/team", { params: p }),
-  get:      (id)  => api.get(`/team/${id}`),
-  workload: (p)   => api.get("/team/workload/summary", { params: p }),
-};
-
-// ─── Notifications ────────────────────────────────────────────────────────────
-export const notificationsApi = {
-  list:        (p)  => api.get("/notifications", { params: p }),
-  count:       ()   => api.get("/notifications/count"),
-  markRead:    (id) => api.patch(`/notifications/${id}/read`),
-  markAllRead: ()   => api.post("/notifications/mark-all-read"),
-};
-
-// ─── Integrations ─────────────────────────────────────────────────────────────
-export const integrationsApi = {
-  list:       (p)   => api.get("/integrations", { params: p }),
-  connect:    (d)   => api.post("/integrations/connect", d),
-  disconnect: (id)  => api.post(`/integrations/${id}/disconnect`),
-  sync:       (id)  => api.post(`/integrations/${id}/sync`),
-};
-
-// ─── Agents ───────────────────────────────────────────────────────────────────
 export const agentsApi = {
-  list:           ()    => api.get("/agents"),
-  status:         (n,p) => api.get(`/agents/${n}/status`, { params: { project_id: p } }),
-  trigger:        (d)   => api.post("/agents/trigger", d),
-  runStandup:     (p)   => api.post("/agents/run-standup", null, { params: p }),
-  generateReport: (p)   => api.post("/agents/generate-report", null, { params: p }),
+  trigger: (data) => api.post("/agents/trigger", data),
+  createTasks: (data) => api.post("/agents/create-tasks", data),
+  predictDelay: (data) => api.post("/agents/predict-delay", data),
+  generateReport: (data) => api.post("/agents/generate-report", data),
+  standup: (data) => api.post("/agents/standup", data),
 };
 
-// ─── Settings ─────────────────────────────────────────────────────────────────
-export const settingsApi = {
-  getProfile:           ()  => api.get("/settings/profile"),
-  updateProfile:        (d) => api.patch("/settings/profile", d),
-  getDeveloperProfile:  ()  => api.get("/settings/developer-profile"),
-  updateDeveloperProfile:(d)=> api.patch("/settings/developer-profile", d),
+export const standupsApi = {
+  list: () => api.get("/standups"),
+  submit: (data) => api.post("/standups", data),
+  today: () => api.get("/standups/today"),
 };
+
+export const reportsApi = {
+  list: () => api.get("/reports"),
+  generate: (data) => api.post("/reports/generate", data),
+};
+
+export const teamApi = {
+  list: () => api.get("/team"),
+  get: (id) => api.get(`/team/${id}`),
+};
+
+export const notificationsApi = {
+  list: () => api.get("/notifications"),
+  markRead: (id) => api.patch(`/notifications/${id}/read`),
+  markAllRead: () => api.patch("/notifications/read-all"),
+};
+export const integrationsApi = {
+  list: () => api.get("/integrations"),
+  connect: (data) => api.post("/integrations/connect", data),
+  disconnect: (type) => api.delete(`/integrations/${type}`),
+};
+
+export const riskApi = {
+  list: () => api.get("/risks"),
+  resolve: (id) => api.patch(`/risks/${id}/resolve`),
+};
+
+export const pullRequestsApi = {
+  list: () => api.get("/pull-requests"),
+  my: () => api.get("/pull-requests/my"),
+};
+
+
+export { api };

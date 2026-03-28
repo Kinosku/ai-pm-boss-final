@@ -1,9 +1,10 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
-import { api } from "../services/api";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 const AuthContext = createContext(null);
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -20,22 +21,30 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    try {
-      const res = await api.post("/auth/login", { email, password });
-      const data = res.data;
-
-      localStorage.setItem("token", data.access_token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      setUser(data.user);
-
-      if (data.user.role === "boss") router.push("/dashboard/boss");
-      else router.push("/dashboard/employee");
-
-    } catch {
-      alert("Invalid credentials");
-    }
+    const res = await axios.post(`${API}/auth/login`, { email, password });
+    const data = res.data;
+    localStorage.setItem("token", data.access_token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    setUser(data.user);
+    if (data.user.role === "boss") router.push("/dashboard/boss");
+    else router.push("/dashboard/employee");
   };
+
+  const signup = async (name, email, password, role) => {
+  const res = await axios.post(`${API}/auth/register`, {
+    full_name: name,
+    email,
+    password,
+    role,
+  });
+  const loginRes = await axios.post(`${API}/auth/login`, { email, password });
+  const loginData = loginRes.data;
+  localStorage.setItem("token", loginData.access_token);
+  localStorage.setItem("user", JSON.stringify(loginData.user));
+  setUser(loginData.user);
+  if (loginData.user.role === "boss") router.push("/dashboard/boss");
+  else router.push("/dashboard/employee");
+};
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -45,7 +54,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
@@ -53,6 +62,6 @@ export function AuthProvider({ children }) {
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  if (!ctx) throw new Error("useAuth must be inside AuthProvider");
   return ctx;
 };

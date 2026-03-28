@@ -1,63 +1,59 @@
-// ─── Date helpers ─────────────────────────────────────────────────────────────
-export const formatDate = (dateStr) => {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+export const capitalize = (str) => {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1).replace(/_/g, " ");
 };
 
 export const timeAgo = (dateStr) => {
   if (!dateStr) return "";
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 60)  return `${mins}m ago`;
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24)   return `${hrs}h ago`;
+  if (hrs < 24) return `${hrs}h ago`;
   return `${Math.floor(hrs / 24)}d ago`;
 };
 
-// ─── Status helpers ───────────────────────────────────────────────────────────
-export const statusColor = (status) => ({
-  todo:        "text-slate-400  bg-slate-400/10",
-  in_progress: "text-blue-400   bg-blue-400/10",
-  in_review:   "text-purple-400 bg-purple-400/10",
-  blocked:     "text-red-400    bg-red-400/10",
-  done:        "text-green-400  bg-green-400/10",
-  backlog:     "text-slate-500  bg-slate-500/10",
-}[status] || "text-slate-400 bg-slate-400/10");
-
-export const priorityColor = (priority) => ({
-  high:   "text-red-400   bg-red-400/10",
-  medium: "text-yellow-400 bg-yellow-400/10",
-  low:    "text-green-400  bg-green-400/10",
-}[priority] || "text-slate-400 bg-slate-400/10");
-
-export const severityColor = (severity) => ({
-  critical: "text-red-400    bg-red-500/10    border-red-500/20",
-  high:     "text-red-400    bg-red-500/10    border-red-500/20",
-  medium:   "text-yellow-400 bg-yellow-500/10 border-yellow-500/20",
-  low:      "text-slate-400  bg-slate-500/10  border-slate-500/20",
-}[severity] || "text-slate-400 bg-slate-400/10");
-
-export const prStatusColor = (status) => ({
-  open:     "text-blue-400   bg-blue-400/10",
-  in_review:"text-purple-400 bg-purple-400/10",
-  approved: "text-green-400  bg-green-400/10",
-  merged:   "text-primary    bg-primary/10",
-  closed:   "text-slate-400  bg-slate-400/10",
-}[status] || "text-slate-400 bg-slate-400/10");
-
-// ─── String helpers ───────────────────────────────────────────────────────────
-export const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, " ") : "";
-export const truncate   = (s, n = 60) => s && s.length > n ? s.slice(0, n) + "…" : s;
-
-// ─── Sprint progress ──────────────────────────────────────────────────────────
-export const sprintProgress = (completed, planned) => {
-  if (!planned) return 0;
-  return Math.min(Math.round((completed / planned) * 100), 100);
+export const formatDate = (dateStr) => {
+  if (!dateStr) return "";
+  return new Date(dateStr).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 };
 
-// ─── Health score color ───────────────────────────────────────────────────────
-export const healthColor = (score) => {
-  if (score >= 75) return "text-primary";
-  if (score >= 50) return "text-yellow-400";
-  return "text-red-400";
+export const statusColor = (status) => {
+  const map = {
+    todo: "bg-slate-700 text-slate-300",
+    in_progress: "bg-blue-500/20 text-blue-400",
+    done: "bg-green-500/20 text-green-400",
+    blocked: "bg-red-500/20 text-red-400",
+  };
+  return map[status] || "bg-slate-700 text-slate-300";
+};
+
+export const priorityColor = (priority) => {
+  const map = {
+    high: "text-red-400",
+    medium: "text-yellow-400",
+    low: "text-green-400",
+  };
+  return map[priority] || "text-slate-400";
+};
+
+export const severityColor = (severity) => {
+  const map = {
+    critical: "border-red-500/30 bg-red-500/5",
+    high: "border-red-400/30 bg-red-400/5",
+    medium: "border-yellow-400/30 bg-yellow-400/5",
+    low: "border-green-400/30 bg-green-400/5",
+  };
+  return map[severity] || "border-white/10 bg-white/5";
+};
+
+export const prStatusColor = (status) => {
+  const map = {
+    open: "bg-green-500/20 text-green-400",
+    merged: "bg-purple-500/20 text-purple-400",
+    closed: "bg-red-500/20 text-red-400",
+    draft: "bg-slate-500/20 text-slate-400",
+  };
+  return map[status] || "bg-slate-700 text-slate-300";
 };

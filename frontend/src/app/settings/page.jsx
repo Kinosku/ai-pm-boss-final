@@ -1,94 +1,124 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
-import Button from "../../components/ui/Button";
 import { settingsApi } from "../../services/api";
 
 export default function SettingsPage() {
-  const [profile, setProfile] = useState({ full_name: "", email: "", avatar_url: "" });
-  const [devProfile, setDevProfile] = useState({ skills: [], github_username: "", slack_user_id: "" });
-  const [saving, setSaving] = useState(false);
-  const [msg, setMsg]       = useState("");
+  const [profile, setProfile] = useState({
+    full_name: "",
+    email: "",
+    role: "",
+  });
 
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+
+  // 🔥 FETCH PROFILE
   useEffect(() => {
-    settingsApi.getProfile().then(({ data }) => setProfile(data)).catch(console.error);
-    settingsApi.getDeveloperProfile().then(({ data }) => {
-      if (data.developer) setDevProfile(data.developer);
-    }).catch(console.error);
+    const fetchProfile = async () => {
+      try {
+        const res = await settingsApi.getProfile();
+        setProfile(res.data || {});
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
   }, []);
 
-  const saveProfile = async () => {
+  // 🔥 HANDLE CHANGE
+  const handleChange = (e) => {
+    setProfile({ ...profile, [e.target.name]: e.target.value });
+  };
+
+  // 🔥 SAVE PROFILE
+  const handleSave = async () => {
     setSaving(true);
+    setMessage("");
+
     try {
-      await settingsApi.updateProfile({ full_name: profile.full_name, avatar_url: profile.avatar_url });
-      setMsg("Profile saved!");
-    } catch {}
-    finally { setSaving(false); setTimeout(() => setMsg(""), 3000); }
+      await settingsApi.updateProfile(profile);
+      setMessage("Profile updated successfully ✅");
+    } catch (err) {
+      console.error(err);
+      setMessage("Failed to update profile ❌");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex min-h-screen bg-background">
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+
+      <div className="flex-1">
         <Navbar title="Settings" />
-        <main className="flex-1 overflow-y-auto px-8 py-6">
-          <div className="max-w-2xl space-y-6">
-            <h1 className="text-3xl font-bold font-headline">Settings</h1>
 
-            {/* Profile */}
-            <div className="bg-surface-container ghost-border rounded-2xl p-6 space-y-4">
-              <h2 className="font-bold text-base">Profile</h2>
-              <div className="grid grid-cols-1 gap-3">
-                {[
-                  { label: "Full Name", key: "full_name", type: "text" },
-                  { label: "Email",     key: "email",     type: "email", disabled: true },
-                  { label: "Avatar URL",key: "avatar_url",type: "text" },
-                ].map(({ label, key, type, disabled }) => (
-                  <div key={key}>
-                    <label className="block text-xs text-on-surface-variant mb-1">{label}</label>
-                    <input type={type} disabled={disabled} value={profile[key] || ""}
-                      onChange={(e) => setProfile({ ...profile, [key]: e.target.value })}
-                      className="w-full bg-surface-container-lowest ghost-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary/40 disabled:opacity-40" />
-                  </div>
-                ))}
+        <div className="p-6 max-w-xl">
+          <h1 className="text-2xl font-bold mb-6">Profile Settings</h1>
+
+          {loading ? (
+            <p className="text-gray-400">Loading profile...</p>
+          ) : (
+            <div className="space-y-4">
+
+              {/* Name */}
+              <div>
+                <label className="block text-sm mb-1">Full Name</label>
+                <input
+                  type="text"
+                  name="full_name"
+                  value={profile.full_name || ""}
+                  onChange={handleChange}
+                  className="w-full p-2 rounded bg-white/5 border border-white/10"
+                />
               </div>
-              <div className="flex items-center gap-3 pt-1">
-                <Button onClick={saveProfile} disabled={saving}>{saving ? "Saving…" : "Save Profile"}</Button>
-                {msg && <span className="text-xs text-primary">{msg}</span>}
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm mb-1">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={profile.email || ""}
+                  onChange={handleChange}
+                  className="w-full p-2 rounded bg-white/5 border border-white/10"
+                />
               </div>
+
+              {/* Role (Read Only) */}
+              <div>
+                <label className="block text-sm mb-1">Role</label>
+                <input
+                  type="text"
+                  value={profile.role || ""}
+                  disabled
+                  className="w-full p-2 rounded bg-gray-800 border border-white/10 text-gray-400"
+                />
+              </div>
+
+              {/* Save Button */}
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="px-4 py-2 rounded bg-primary text-black font-semibold hover:opacity-90"
+              >
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+
+              {/* Message */}
+              {message && (
+                <p className="text-sm text-gray-400">{message}</p>
+              )}
             </div>
-
-            {/* Developer profile */}
-            {devProfile && (
-              <div className="bg-surface-container ghost-border rounded-2xl p-6 space-y-4">
-                <h2 className="font-bold text-base">Developer Profile</h2>
-                <div className="grid grid-cols-1 gap-3">
-                  <div>
-                    <label className="block text-xs text-on-surface-variant mb-1">GitHub Username</label>
-                    <input value={devProfile.github_username || ""}
-                      onChange={(e) => setDevProfile({ ...devProfile, github_username: e.target.value })}
-                      className="w-full bg-surface-container-lowest ghost-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary/40" />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-on-surface-variant mb-1">Slack User ID</label>
-                    <input value={devProfile.slack_user_id || ""}
-                      onChange={(e) => setDevProfile({ ...devProfile, slack_user_id: e.target.value })}
-                      className="w-full bg-surface-container-lowest ghost-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary/40" />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-on-surface-variant mb-1">Skills (comma-separated)</label>
-                    <input value={(devProfile.skills || []).join(", ")}
-                      onChange={(e) => setDevProfile({ ...devProfile, skills: e.target.value.split(",").map(s=>s.trim()).filter(Boolean) })}
-                      placeholder="python, fastapi, react, postgresql…"
-                      className="w-full bg-surface-container-lowest ghost-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary/40" />
-                  </div>
-                </div>
-                <Button onClick={() => settingsApi.updateDeveloperProfile(devProfile)}>Save Developer Profile</Button>
-              </div>
-            )}
-          </div>
-        </main>
+          )}
+        </div>
       </div>
     </div>
   );

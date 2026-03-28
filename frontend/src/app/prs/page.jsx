@@ -1,80 +1,116 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import { prsApi } from "../../services/api";
-import { prStatusColor, timeAgo, capitalize } from "../../utils/helpers";
-import { useAuth } from "../../context/AuthContext";
 
 export default function PRsPage() {
-  const { isBoss }        = useAuth();
-  const [prs, setPrs]     = useState([]);
+  const [prs, setPrs] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // 🔥 Fetch PRs
   useEffect(() => {
-    const fn = isBoss ? prsApi.list({}) : prsApi.my();
-    fn.then(({ data }) => setPrs(data)).finally(() => setLoading(false));
-  }, [isBoss]);
+    const fetchPRs = async () => {
+      try {
+        const res = await prsApi.list();
+        setPrs(res.data || []);
+      } catch (err) {
+        console.error("Error fetching PRs:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPRs();
+  }, []);
+
+  // 🔥 Update PR status
+  const updateStatus = async (id, status) => {
+    try {
+      await prsApi.update(id, { status });
+
+      setPrs((prev) =>
+        prev.map((pr) =>
+          pr.id === id ? { ...pr, status } : pr
+        )
+      );
+    } catch (err) {
+      console.error("Error updating PR:", err);
+    }
+  };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex min-h-screen bg-background">
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Navbar title="Pull Requests" />
-        <main className="flex-1 overflow-y-auto px-8 py-6">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold font-headline">My PRs & Reviews</h1>
-            <p className="text-on-surface-variant text-sm mt-1">Track contributions, reviews, and deployment status</p>
-          </div>
 
-          <div className="bg-surface-container ghost-border rounded-2xl overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/5">
-                  {["PR","Title","Branch","Status","Review","Stale","Opened"].map((h) => (
-                    <th key={h} className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-500">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {loading && (
-                  <tr><td colSpan={7} className="text-center text-slate-500 text-sm py-8">Loading…</td></tr>
-                )}
-                {!loading && prs.length === 0 && (
-                  <tr><td colSpan={7} className="text-center text-slate-500 text-sm py-8">No PRs found</td></tr>
-                )}
-                {prs.map((pr) => (
-                  <tr key={pr.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="px-5 py-3.5 text-sm font-mono text-on-surface-variant">#{pr.github_pr_number}</td>
-                    <td className="px-5 py-3.5">
-                      <a href={pr.github_url} target="_blank" rel="noopener noreferrer"
-                        className="text-sm font-medium text-on-surface hover:text-primary transition-colors line-clamp-1">
-                        {pr.title}
-                      </a>
-                    </td>
-                    <td className="px-5 py-3.5 text-xs font-mono text-slate-500">{pr.head_branch || "—"}</td>
-                    <td className="px-5 py-3.5">
-                      <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${prStatusColor(pr.status)}`}>
-                        {capitalize(pr.status)}
+      <div className="flex-1">
+        <Navbar title="Pull Requests" />
+
+        <div className="p-6">
+          <h1 className="text-2xl font-bold mb-6">Pull Requests</h1>
+
+          {loading ? (
+            <p className="text-gray-400">Loading PRs...</p>
+          ) : prs.length === 0 ? (
+            <p className="text-gray-400">No pull requests found</p>
+          ) : (
+            <div className="space-y-4">
+              {prs.map((pr) => (
+                <div
+                  key={pr.id}
+                  className="p-4 rounded-lg border border-white/10 bg-white/5"
+                >
+                  {/* Title */}
+                  <h2 className="font-semibold text-lg">{pr.title}</h2>
+
+                  {/* Description */}
+                  {pr.description && (
+                    <p className="text-sm text-gray-400 mt-1">
+                      {pr.description}
+                    </p>
+                  )}
+
+                  {/* Info */}
+                  <div className="flex justify-between items-center mt-3">
+                    <span className="text-xs text-gray-400">
+                      Status:{" "}
+                      <span className="font-semibold">
+                        {pr.status || "open"}
                       </span>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${
-                        pr.review_status === "approved" ? "text-green-400 bg-green-400/10" :
-                        pr.review_status === "changes_requested" ? "text-red-400 bg-red-400/10" :
-                        "text-slate-400 bg-slate-400/10"
-                      }`}>{capitalize(pr.review_status || "pending")}</span>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      {pr.is_stale && <span className="text-[10px] font-bold text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded-full">Stale</span>}
-                    </td>
-                    <td className="px-5 py-3.5 text-xs text-slate-500">{timeAgo(pr.opened_at)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </main>
+                    </span>
+
+                    {/* Actions */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => updateStatus(pr.id, "approved")}
+                        className="px-3 py-1 text-xs rounded bg-green-500 text-black"
+                      >
+                        Approve
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          updateStatus(pr.id, "changes_requested")
+                        }
+                        className="px-3 py-1 text-xs rounded bg-red-500 text-black"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Timestamp */}
+                  {pr.updated_at && (
+                    <p className="text-[10px] text-gray-500 mt-2">
+                      Updated: {pr.updated_at}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

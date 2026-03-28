@@ -1,80 +1,81 @@
 "use client";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
-const BOSS_NAV = [
-  { label: "Dashboard",    href: "/dashboard/boss",  icon: "dashboard" },
-  { label: "Risk Alerts",  href: "/risks",            icon: "warning" },
-  { label: "AI Agents",    href: "/agents",           icon: "smart_toy" },
-  { label: "Reports",      href: "/reports",          icon: "assessment" },
-  { label: "Team",         href: "/team",             icon: "group" },
-  { label: "Sprint Board", href: "/sprint",           icon: "view_kanban" },
-  { label: "Integrations", href: "/integrations",     icon: "extension" },
-  { label: "Settings",     href: "/settings",         icon: "settings" },
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+
+const bossLinks = [
+  { href: "/dashboard/boss", icon: "🏠", label: "Dashboard" },
+  { href: "/projects", icon: "📁", label: "Projects" },
+  { href: "/tasks", icon: "✅", label: "Tasks" },
+  { href: "/sprint", icon: "🏃", label: "Sprints" },
+  { href: "/risks", icon: "⚠️", label: "Risk Alerts" },
+  { href: "/reports", icon: "📊", label: "Reports" },
+  { href: "/standups", icon: "🎙️", label: "Standups" },
+  { href: "/team", icon: "👥", label: "Team" },
+  { href: "/prs", icon: "🔀", label: "Pull Requests" },
+  { href: "/notifications", icon: "🔔", label: "Notifications" },
+  { href: "/integrations", icon: "🔌", label: "Integrations" },
+  { href: "/settings", icon: "⚙️", label: "Settings" },
 ];
 
-const EMPLOYEE_NAV = [
-  { label: "My Work",   href: "/dashboard/employee", icon: "dashboard" },
-  { label: "My Tasks",  href: "/tasks",              icon: "assignment" },
-  { label: "My PRs",    href: "/prs",                icon: "merge_type" },
-  { label: "Team",      href: "/team",               icon: "groups" },
-  { label: "Standups",  href: "/standups",           icon: "bolt" },
-  { label: "Sprint",    href: "/sprint",             icon: "view_kanban" },
-  { label: "Notifications", href: "/notifications",  icon: "notifications" },
-  { label: "Settings",  href: "/settings",           icon: "settings" },
+const employeeLinks = [
+  { href: "/dashboard/employee", icon: "🏠", label: "My Dashboard" },
+  { href: "/tasks", icon: "✅", label: "My Tasks" },
+  { href: "/prs", icon: "🔀", label: "My PRs" },
+  { href: "/standups", icon: "🎙️", label: "Standups" },
+  { href: "/sprint", icon: "🏃", label: "Sprint" },
+  { href: "/notifications", icon: "🔔", label: "Notifications" },
+  { href: "/integrations", icon: "🔌", label: "Integrations" },
+  { href: "/settings", icon: "⚙️", label: "Settings" },
 ];
 
 export default function Sidebar() {
-  const { user, logout, isBoss } = useAuth();
+  const { user, logout } = useAuth();
   const pathname = usePathname();
-  const nav = isBoss ? BOSS_NAV : EMPLOYEE_NAV;
-  const accentColor = isBoss ? "#00ffb4" : "#00c8ff";
+  const links = user?.role === "boss" ? bossLinks : employeeLinks;
 
   return (
-    <aside className="flex flex-col h-screen sticky top-0 left-0 border-r border-white/5 w-[220px] bg-background z-50 shrink-0">
-      {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 h-16 border-b border-white/5">
-        <div className="w-7 h-7 rounded-lg velocity-gradient-bg flex items-center justify-center">
-          <span className="material-symbols-outlined text-background text-base" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
-        </div>
-        <span className="text-base font-bold font-headline velocity-gradient">AI Boss</span>
+    <aside className="w-56 h-screen flex flex-col bg-surface-container ghost-border border-r border-white/5 shrink-0">
+      <div className="px-5 py-5 border-b border-white/5">
+        <h1 className="text-lg font-bold font-headline">
+          AI PM <span className="velocity-gradient">BOSS</span>
+        </h1>
+        <p className="text-[10px] text-on-surface-variant mt-0.5 capitalize">
+          {user?.role || "user"} · {user?.name || ""}
+        </p>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
-        {nav.map(({ label, href, icon }) => {
-          const active = pathname === href || pathname.startsWith(href + "/");
+      <nav className="flex-1 overflow-y-auto py-3 scrollbar-hide">
+        {links.map(({ href, icon, label }) => {
+          const active = pathname === href;
           return (
             <Link key={href} href={href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
+              className={`flex items-center gap-3 px-4 py-2.5 mx-2 rounded-xl text-sm transition-all ${
                 active
-                  ? `bg-white/5 border-r-2 font-semibold`
-                  : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+                  ? "bg-primary/10 text-primary font-semibold"
+                  : "text-on-surface-variant hover:bg-white/5 hover:text-on-surface"
               }`}
-              style={active ? { color: accentColor, borderColor: accentColor } : {}}
             >
-              <span className="material-symbols-outlined text-[20px]">{icon}</span>
+              <span className="text-base">{icon}</span>
               <span>{label}</span>
             </Link>
           );
         })}
       </nav>
 
-      {/* User + Logout */}
-      <div className="px-3 pb-4 border-t border-white/5 pt-3 space-y-1">
-        <div className="flex items-center gap-2.5 px-3 py-2">
-          <div className="w-7 h-7 rounded-full velocity-gradient-bg flex items-center justify-center text-background text-xs font-bold shrink-0">
-            {user?.full_name?.[0] || "U"}
+      <div className="px-4 py-4 border-t border-white/5">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-8 h-8 rounded-full velocity-gradient-bg flex items-center justify-center text-background font-bold text-sm">
+            {user?.name?.[0]?.toUpperCase() || "U"}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-semibold truncate">{user?.full_name || "User"}</p>
-            <p className="text-[10px] text-slate-500 capitalize">{user?.role}</p>
+            <p className="text-xs font-semibold truncate">{user?.name || "User"}</p>
+            <p className="text-[10px] text-on-surface-variant truncate">{user?.email || ""}</p>
           </div>
         </div>
         <button onClick={logout}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/[0.04] transition-all">
-          <span className="material-symbols-outlined text-[20px]">logout</span>
-          <span>Logout</span>
+          className="w-full text-xs text-red-400 hover:text-red-300 hover:bg-red-400/10 py-2 rounded-xl transition-all">
+          Sign Out
         </button>
       </div>
     </aside>
